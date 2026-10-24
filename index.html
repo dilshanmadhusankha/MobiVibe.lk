@@ -1,3 +1,8 @@
+<?php
+    include 'database_setup.php';
+    include 'db_connection.php';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -93,5 +98,18 @@
 
 <div class="toast" id="toast"><i class="fa-solid fa-circle-check"></i><span id="toastMessage">Added to cart!</span></div>
 <script src="script.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const dbMessage = "<?php echo isset($db_message) ? $db_message : ''; ?>";
+        
+        if (dbMessage.trim() !== "") {
+            if (typeof showToast === "function") {
+                showToast(dbMessage);
+            }
+        }
+    });
+</script>
+
 </body>
 </html>
