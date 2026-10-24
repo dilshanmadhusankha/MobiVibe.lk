@@ -15,3 +15,6 @@ IMPORTANT
 - Admin dashboard supports product creation, editing, safe deactivation, stock visibility, order listing and order-status updates. SKU values must be unique.
 - Home and Shop product cards now refresh from api_products.php when opened through localhost; newly added active products should appear in those catalog grids after refresh.
 - This is a campus/demo project. Before production, add CSRF protection to state-changing forms, rate limiting, stronger audit logging, email verification, privacy/terms pages, and a reviewed payment notification implementation.
+
+- Wishlist fix: the header count now reads the same localStorage wishlist as the product cards. Items are re-rendered after the database catalog loads, hearts show their saved state, and items can be removed from wishlist.html. Wishlist is browser-local (localStorage), not synchronized between devices/accounts.
+- Payment setup is intentionally not bypassed: checkout will stop before creating an order while placeholder PayHere credentials remain. A valid sandbox Merchant ID/Secret and a correctly configured sandbox domain are required; this cannot be verified without your own credentials. If PayHere shows “Unauthorized payment request”, check the merchant ID, secret/hash, and registered domain.

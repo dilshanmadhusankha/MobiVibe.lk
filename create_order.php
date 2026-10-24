@@ -7,6 +7,7 @@ $first=trim($_POST['first_name']??'');$last=trim($_POST['last_name']??'');$email
 $cart=json_decode($_POST['cart_json']??'',true);
 if(!$first||!$last||!filter_var($email,FILTER_VALIDATE_EMAIL)||!$phone||!$address||!$city||!is_array($cart)||!count($cart))stop_order('Please complete all checkout fields and add at least one item.');
 if(count($cart)>30)stop_order('Cart contains too many items.');
+if(PAYHERE_MERCHANT_ID==='YOUR_SANDBOX_MERCHANT_ID'||PAYHERE_MERCHANT_SECRET==='YOUR_SANDBOX_MERCHANT_SECRET')stop_order('PayHere sandbox is not configured. Add your sandbox Merchant ID and Secret in payhere_config.php before placing an order. No order has been created.');
 try{
  $conn->begin_transaction();
  $s=$conn->prepare("INSERT INTO addresses(user_id,recipient_name,phone,address_line,city,is_default) VALUES(?,?,?,?,?,TRUE)");
@@ -22,8 +23,5 @@ try{
  $s=$conn->prepare("INSERT INTO payments(order_id,payment_method,amount,payment_status) VALUES(?,?,?,'Pending')");$s->bind_param('isd',$orderId,$method,$total);$s->execute();$s->close();
  $conn->commit();
 }catch(Throwable $e){$conn->rollback();stop_order($e instanceof RuntimeException?$e->getMessage():'Could not create the order. Check database setup and try again.');}
-if(PAYHERE_MERCHANT_ID==='YOUR_SANDBOX_MERCHANT_ID'||PAYHERE_MERCHANT_SECRET==='YOUR_SANDBOX_MERCHANT_SECRET'){
- echo '<!doctype html><meta charset="utf-8"><h1>Order #'.(int)$orderId.' created (Pending)</h1><p>PayHere sandbox is not configured yet. Add your sandbox Merchant ID and Secret to <code>payhere_config.php</code>, then retry checkout. This order is not paid.</p><a href="account.html">My account</a>';exit;
-}
 $merchant=PAYHERE_MERCHANT_ID;$secret=strtoupper(md5(PAYHERE_MERCHANT_SECRET));$amount=number_format($total,2,'.','');$currency='LKR';$hash=strtoupper(md5($merchant.$orderId.$amount.$currency.$secret));$name=$first.' '.$last;$parts=preg_split('/\s+/',trim($name),2);$f=$parts[0]??$first;$l=$parts[1]??$last;
 ?><!doctype html><html><head><meta charset="utf-8"><title>Redirecting to PayHere</title></head><body><p>Redirecting order #<?= (int)$orderId ?> to PayHere Sandbox…</p><form id="payhere" method="post" action="<?=PAYHERE_SANDBOX?'https://sandbox.payhere.lk/pay/checkout':'https://www.payhere.lk/pay/checkout'?>"><?php foreach(['merchant_id'=>$merchant,'return_url'=>PAYHERE_RETURN_URL.'?order_id='.$orderId,'cancel_url'=>PAYHERE_CANCEL_URL.'?order_id='.$orderId,'notify_url'=>PAYHERE_NOTIFY_URL,'order_id'=>(string)$orderId,'items'=>'MobiVibe order #'.$orderId,'currency'=>$currency,'amount'=>$amount,'first_name'=>$f,'last_name'=>$l,'email'=>$email,'phone'=>$phone,'address'=>$address,'city'=>$city,'country'=>'Sri Lanka','hash'=>$hash] as $k=>$v):?><input type="hidden" name="<?=htmlspecialchars($k)?>" value="<?=htmlspecialchars((string)$v,ENT_QUOTES)?>"><?php endforeach;?></form><script>document.getElementById('payhere').submit()</script></body></html>
