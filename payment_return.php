@@ -1,4 +1,0 @@
-<?php
-require_once 'auth_guard.php';
-$orderId=(int)($_GET['order_id']??0);
-?><!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Payment return</title><body style="font-family:Arial,sans-serif;max-width:700px;margin:60px auto;padding:20px"><h1>Payment response received</h1><p>Order #<?=htmlspecialchars((string)$orderId)?>. The browser return alone does not confirm payment; the order will be marked paid only after a valid PayHere server notification.</p><a href="account.html">My account</a> · <a href="shop.html">Continue shopping</a></body></html>
